@@ -2,7 +2,11 @@
 <script>
   let rows = [];
   let score = 0;
+  let timer = 0;
   let gameover = false;
+  
+
+
  
   function generateRow(){
     let row = new Array(4).fill("white");
@@ -16,11 +20,21 @@
     }
   }
 
+  /*function increment(){
+    if(start == true){
+      while(gameover==false){
+        timer++;
+        return timer;
+      }
+    }
+  }*/
+
   function tapped(i, j){
     if(i != rows.length - 1 || rows[i][j] == "white"){
         gameover = true; 
         rows[i][j] = "red";
     } else {
+        
         rows.splice(i); 
         rows = [generateRow(), ...rows]; 
         score++; 
@@ -61,7 +75,7 @@
   }
 
   .app .game{
-    width: 100%;
+    width: 110%;
     height: calc(100% - 50px);
     background: #fff;
   }
@@ -98,7 +112,7 @@
     position: absolute;
     top: 0px;
     left: 0px;
-    width: 100%;
+    width: 110%;
     height: 100%;
     background: rgb(0, 0, 0, 0.8);
     display: flex;
@@ -136,10 +150,12 @@
 </style>
  
 <main class="app">
+  
   <div class="header">
     <h4>PianoTiles</h4>
+    <p>Timer: {timer}</p>
     <p>Score: {score}</p>
-    <p>Timer : </p>
+    
   </div>
   <div class="game">
     {#each rows as row,i}
@@ -156,6 +172,7 @@
   {#if gameover}
     <div class="result">
         <h2>Hai perso</h2>
+        
         <p>Punteggio: {score}</p>
         <button on:click={restart}>restart</button>
     </div>
