@@ -139,6 +139,7 @@
   <div class="header">
     <h4>PianoTiles</h4>
     <p>Score: {score}</p>
+    <p>Timer : </p>
   </div>
   <div class="game">
     {#each rows as row,i}
