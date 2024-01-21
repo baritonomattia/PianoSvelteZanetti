@@ -2,7 +2,6 @@
 <script>
   let rows = [];
   let score = 0;
-  let timer = 0;
   let gameover = false;
   
 
@@ -153,7 +152,6 @@
   
   <div class="header">
     <h4>PianoTiles</h4>
-    <p>Timer: {timer}</p>
     <p>Score: {score}</p>
     
   </div>
