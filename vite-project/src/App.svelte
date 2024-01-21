@@ -1,56 +1,85 @@
-
 <script>
   let rows = [];
   let score = 0;
   let gameover = false;
-  
+  let timeRemaining = 120; // 2 minuti
+  let timerInterval;
 
-
- 
-  function generateRow(){
+  function generateRow() {
     let row = new Array(4).fill("white");
-    let pos = Math.trunc(Math.random()*4);
+    let pos = Math.trunc(Math.random() * 4);
     row[pos] = "black";
     return row;
   }
-  function fillRows(){
-    for(let i=0; i<4; i++){
-        rows.push(generateRow());
+
+  function fillRows() {
+    for (let i = 0; i < 4; i++) {
+      rows.push(generateRow());
     }
   }
 
-  /*function increment(){
-    if(start == true){
-      while(gameover==false){
-        timer++;
-        return timer;
+  function tapped(i, j) {
+    if (i !== rows.length - 1 || rows[i][j] === "white") {
+      gameover = true;
+      rows[i][j] = "red";
+      endGame();
+    } else {
+      rows.splice(i);
+      rows = [generateRow(), ...rows];
+      score++;
+      if (!timerInterval) {
+        startTimer();
       }
     }
-  }*/
-
-  function tapped(i, j){
-    if(i != rows.length - 1 || rows[i][j] == "white"){
-        gameover = true; 
-        rows[i][j] = "red";
-    } else {
-        
-        rows.splice(i); 
-        rows = [generateRow(), ...rows]; 
-        score++; 
-    }
   }
 
-  function restart(){
-    score = 0; 
+  function updateTimerDisplay() {
+    const timerDisplay = document.getElementById("timer");
+    timerDisplay.textContent = `Time: ${formatTime(timeRemaining)}`;
+  }
+
+  function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+  }
+
+  function startTimer() {
+    timerInterval = setInterval(function () {
+      timeRemaining--;
+      updateTimerDisplay();
+
+      if (timeRemaining <= 0) {
+        endGame();
+      }
+    }, 1000);
+  }
+
+  function endGame() {
+    gameover = true;
+    clearInterval(timerInterval);
+    timerInterval = null; // Resetta il timerInterval
+    
+    const resultMessage = document.getElementById('result-message');
+    const resultScore = document.getElementById('result-score');
+    
+    resultMessage.textContent = `Tempo finito`;
+    resultScore.textContent = `Punteggio: ${score}`;
+  }
+
+  function restart() {
+    score = 0;
     gameover = false;
-    rows = []; 
-    fillRows(); 
+    rows = [];
+    fillRows();
+    timeRemaining = 120; // 2 minuti
+    updateTimerDisplay();
   }
   fillRows();
 </script>
- 
+
 <style>
-  .app{
+  .app {
     position: fixed;
     top: 0px;
     left: 50%;
@@ -59,7 +88,8 @@
     height: 100%;
     max-width: 400px;
   }
-  .app .header{
+
+  .app .header {
     position: sticky;
     top: 0px;
     left: 0px;
@@ -70,36 +100,36 @@
     justify-content: space-between;
     align-items: center;
     padding: 0px 20px;
-    color: #fff
+    color: #fff;
   }
 
-  .app .game{
+  .app .game {
     width: 110%;
     height: calc(100% - 50px);
     background: #fff;
   }
 
-  .app .game .row{
+  .app .game .row {
     display: flex;
     width: 100%;
     height: calc(100% / 4);
   }
 
-  .app .game .row .box{
-    flex : 1;
-    border : 1px solid #555;
+  .app .game .row .box {
+    flex: 1;
+    border: 1px solid #555;
     cursor: pointer;
   }
 
-  .app .game .row .box.black{
+  .app .game .row .box.black {
     background: #111;
   }
 
-  .app .game .row .box.red{
+  .app .game .row .box.red {
     animation: blinkRed 500ms ease-in-out infinite;
   }
 
-  @keyframes blinkRed{
+  @keyframes blinkRed {
     0%, 100% {
         background: #fff;
     }
@@ -107,7 +137,8 @@
         background: tomato;
     }
   }
-  .result{
+
+  .result {
     position: absolute;
     top: 0px;
     left: 0px;
@@ -121,7 +152,7 @@
     gap: 10px;
   }
 
-  .result h2{
+  .result h2 {
     font-size: 40px;
     color: #fff;
   }
@@ -132,48 +163,38 @@
     color: #eee;
   }
 
-  .result button{
-    padding : 10px 20px; 
-    cursor : pointer; 
+  .result button {
+    padding: 10px 20px;
+    cursor: pointer;
     font-size: 16px;
-    border : 2px solid #fff;
+    border: 2px solid #fff;
     color: #fff;
     outline: none;
     font-weight: 600;
-    background:transparent ; 
-
+    background: transparent;
   }
-
-
- 
 </style>
- 
+
 <main class="app">
-  
   <div class="header">
     <h4>PianoTiles</h4>
+    <p id="timer">Time: 2:00</p>
     <p>Score: {score}</p>
-    
   </div>
   <div class="game">
-    {#each rows as row,i}
-        <div class="row">
-            {#each row as box, j}
-                <div
-                    class={"box "+box}
-                    on:click={()=>tapped(i, j)}
-                ></div>    
-            {/each}
-        </div>
+    {#each rows as row, i}
+    <div class="row">
+      {#each row as box, j}
+      <div class={"box " + box} on:click={() => tapped(i, j)}></div>
+      {/each}
+    </div>
     {/each}
   </div>
   {#if gameover}
-    <div class="result">
-        <h2>Hai perso</h2>
-        
-        <p>Punteggio: {score}</p>
-        <button on:click={restart}>restart</button>
-    </div>
-    {/if}
+  <div class="result">
+    <h2 id="result-message">Tempo finito</h2>
+    <p id="result-score">Punteggio: {score}</p>
+    <button on:click={restart}>Restart</button>
+  </div>
+  {/if}
 </main>
-
