@@ -4,6 +4,7 @@
   let gameover = false;
   let timeRemaining = 120; // 2 minuti
   let timerInterval;
+  let keydownListener; // Aggiunto un riferimento all'ascoltatore per la rimozione successiva
 
   function generateRow() {
     let row = new Array(4).fill("white");
@@ -33,6 +34,20 @@
     }
   }
 
+  function handleKeyDown(event) {
+    if (gameover) {
+      // Se il gioco è già finito, ignora gli input da tastiera
+      return;
+    }
+
+    const keyMap = { KeyA: 0, KeyS: 1, KeyD: 2, KeyF: 3 };
+    const rowIndex = rows.length - 1;
+    const columnIndex = keyMap[event.code];
+    if (columnIndex !== undefined) {
+      tapped(rowIndex, columnIndex);
+    }
+  }
+
   function updateTimerDisplay() {
     const timerDisplay = document.getElementById("timer");
     timerDisplay.textContent = `Time: ${formatTime(timeRemaining)}`;
@@ -56,13 +71,19 @@
   }
 
   function endGame() {
+    if (keydownListener) {
+      // Rimuovi l'ascoltatore di eventi keydown solo se è stato precedentemente registrato
+      document.removeEventListener('keydown', handleKeyDown);
+      keydownListener = null;
+    }
+
     gameover = true;
     clearInterval(timerInterval);
     timerInterval = null; // Resetta il timerInterval
-    
+
     const resultMessage = document.getElementById('result-message');
     const resultScore = document.getElementById('result-score');
-    
+
     resultMessage.textContent = `Tempo finito`;
     resultScore.textContent = `Punteggio: ${score}`;
   }
@@ -74,9 +95,25 @@
     fillRows();
     timeRemaining = 120; // 2 minuti
     updateTimerDisplay();
+
+    // Rimuovi l'ascoltatore di eventi keydown se è stato precedentemente registrato
+    if (keydownListener) {
+      document.removeEventListener('keydown', handleKeyDown);
+      keydownListener = null;
+    }
+
+    // Aggiungi nuovamente l'ascoltatore di eventi keydown
+    keydownListener = document.addEventListener('keydown', handleKeyDown);
   }
   fillRows();
+
+  // Aggiungi il gestore dell'evento keydown al documento solo se non è già stato registrato
+  if (!keydownListener) {
+    keydownListener = document.addEventListener('keydown', handleKeyDown);
+  }
 </script>
+
+
 
 <style>
   .app {
